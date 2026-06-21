@@ -1,0 +1,6 @@
+{
+  "name": "疫木非法调运智慧监测平台",
+  "description": "基于公安卡口图像的疫木非法调运智能监测与跨界预警系统",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
