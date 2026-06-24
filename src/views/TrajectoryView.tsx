@@ -67,6 +67,27 @@ const createArrowIcon = (angle: number) =>
     iconAnchor: [8, 8]
   });
 
+const MAP_PROVIDERS = {
+  amap: {
+    name: '高德地图 (推荐：国内极速流畅)',
+    url: 'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}',
+    attribution: '&copy; <a href="https://amap.com" target="_blank">高德地图</a>',
+    subdomains: ['1', '2', '3', '4']
+  },
+  cartodb: {
+    name: 'CartoDB 极简灰 (国外高速推荐)',
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://carto.com/" target="_blank">CartoDB</a>',
+    subdomains: ['a', 'b', 'c', 'd']
+  },
+  osm: {
+    name: 'OpenStreetMap (海外标准源)',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank">OSM</a>',
+    subdomains: ['a', 'b', 'c']
+  }
+};
+
 export function TrajectoryView({ vehicle, initialAlertId, onBack }: TrajectoryViewProps) {
   // Find all unique dates in the trajectory
   const availableDates = useMemo(() => {
@@ -84,6 +105,7 @@ export function TrajectoryView({ vehicle, initialAlertId, onBack }: TrajectoryVi
   const [isFilterExpanded, setIsFilterExpanded] = useState(true);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [selectedAlertId, setSelectedAlertId] = useState<string | null>(initialAlertId);
+  const [mapProvider, setMapProvider] = useState<'amap' | 'osm' | 'cartodb'>('amap');
 
   // Sync dates when vehicle change
   useEffect(() => {
@@ -315,8 +337,10 @@ export function TrajectoryView({ vehicle, initialAlertId, onBack }: TrajectoryVi
             <MapController center={activeCenter} />
             <MapResizer isCollapsed={isSidebarCollapsed} />
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              key={mapProvider}
+              attribution={MAP_PROVIDERS[mapProvider].attribution}
+              url={MAP_PROVIDERS[mapProvider].url}
+              subdomains={MAP_PROVIDERS[mapProvider].subdomains}
             />
             {pathCoordinates.length > 1 && (
               <Polyline 
@@ -398,6 +422,20 @@ export function TrajectoryView({ vehicle, initialAlertId, onBack }: TrajectoryVi
             <p className="text-xs text-slate-500 mt-1">
               基于交通探头和卡口抓拍智能还原追踪线索
             </p>
+          </div>
+
+          {/* Map Provider Selector */}
+          <div className="absolute top-4 right-10 z-[400] bg-white/95 backdrop-blur-sm p-1.5 rounded-xl shadow-md border border-slate-200 flex items-center space-x-1">
+            <span className="text-[10px] font-bold text-slate-500 pl-2 whitespace-nowrap">地图底图:</span>
+            <select
+              value={mapProvider}
+              onChange={(e) => setMapProvider(e.target.value as 'amap' | 'osm' | 'cartodb')}
+              className="text-[11px] bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 font-bold outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+            >
+              <option value="amap">高德地图 (推荐：国内极速)</option>
+              <option value="cartodb">CartoDB 极简灰 (国外推荐)</option>
+              <option value="osm">OpenStreetMap (海外标准)</option>
+            </select>
           </div>
 
           {/* Collapse/Expand Toggle Button */}
